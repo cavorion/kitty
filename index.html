@@ -64,18 +64,6 @@
       max-width:52ch;
     }
 
-    .mark{
-      width:34px;
-      height:34px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      display:grid;
-      place-items:center;
-      color:var(--accent);
-      font-weight:700;
-      user-select:none;
-    }
-
     .dear{
       font-size:22px;
       margin:14px 0 10px;
@@ -178,46 +166,50 @@
     }
     .sosOverlay p{ color:#fff; opacity:0.8; margin:0; font-size:16px; }
 
-  
-  .logo { 
-  width: 34px; 
-  height: 34px; 
-  opacity: 0.9; 
-  object-fit: contain;
-}
+    .logo {
+      width: 34px;
+      height: 34px;
+      opacity: 0.9;
+      object-fit: contain;
+    }
   </style>
 </head>
+
 <body>
   <div class="card">
-  <div class="header">
-  <div>
-    <h1 class="title">DEAR KITTY</h1>
-    <div class="subtitle">A private space. Nothing is analysed. Nothing is sent unless you choose.</div>
-  </div>
-<div style="margin-top:10px;">
-  <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">
-    Witness
-  </label>
-  <input
-    id="witnessInput"
-    type="text"
-    placeholder="Name or symbol (optional)"
-    style="
-      background: rgba(7,10,15,0.6);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 8px 10px;
-      color: var(--text);
-      font-size: 14px;
-      width: 220px;
-    "
-  />
-</div>
-    <img class="logo" src="./favicon.png" alt="Cavorion">
-</div>
+    <div class="header">
+      <div>
+        <h1 class="title">DEAR KITTY</h1>
+        <div class="subtitle">A private space. Nothing is analysed. Nothing is sent unless you choose.</div>
+      </div>
 
-<div class="dear">Dear <span id="witnessName">Kitty</span>,</div>
-    
+      <div style="display:flex; align-items:flex-start; gap:12px; margin-top:10px;">
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">
+            Witness
+          </label>
+          <input
+            id="witnessInput"
+            type="text"
+            placeholder="Name or symbol (optional)"
+            style="
+              background: rgba(7,10,15,0.6);
+              border: 1px solid var(--line);
+              border-radius: 10px;
+              padding: 8px 10px;
+              color: var(--text);
+              font-size: 14px;
+              width: 220px;
+            "
+          />
+        </div>
+
+        <img class="logo" src="./favicon.png" alt="Cavorion">
+      </div>
+    </div>
+
+    <div class="dear">Dear <span id="witnessName">Kitty</span><span id="comma">,</span></div>
+
     <textarea id="entry" placeholder="Write here…"></textarea>
 
     <div class="footer">
@@ -245,55 +237,67 @@
   <div class="sosOverlay" id="sosOverlay">
     <h1>SOS</h1>
     <p>Emergency signal active.</p>
-    <button class="btn" id="exitSosBtn" style="min-width:220px;">EXIT SOS<small>Return to journal</small></button>
+    <button class="btn" id="exitSosBtn" style="min-width:220px;">
+      EXIT SOS
+      <small>Return to journal</small>
+    </button>
   </div>
 
   <script>
-    // Minimal placeholders — wire these to your local save + email scripts later.
-    const entry = document.getElementById('entry');
-    const saveBtn = document.getElementById('saveBtn');
-    const checkinBtn = document.getElementById('checkinBtn');
-    const sosBtn = document.getElementById('sosBtn');
-    const overlay = document.getElementById('sosOverlay');
-    const exitSosBtn = document.getElementById('exitSosBtn');
+    window.addEventListener('DOMContentLoaded', () => {
+      // Existing controls
+      const entry = document.getElementById('entry');
+      const saveBtn = document.getElementById('saveBtn');
+      const checkinBtn = document.getElementById('checkinBtn');
+      const sosBtn = document.getElementById('sosBtn');
+      const overlay = document.getElementById('sosOverlay');
+      const exitSosBtn = document.getElementById('exitSosBtn');
 
-    saveBtn.addEventListener('click', () => {
-      alert("Entry saved.\\nNothing was sent.");
+      // Witness controls
+      const witnessInput = document.getElementById('witnessInput');
+      const witnessName = document.getElementById('witnessName');
+      const comma = document.getElementById('comma');
+
+      const applyWitness = (raw) => {
+        const v = (raw || "").trim();
+        // If blank, revert to Kitty (keeps the concept of "named witness" by default)
+        witnessName.textContent = v || "Kitty";
+        // Optional: hide comma when blank. If you want always comma, delete next line.
+        if (comma) comma.style.display = (v || "Kitty") ? "inline" : "none";
+      };
+
+      // Load saved witness
+      const saved = localStorage.getItem('kitty_witness') || "";
+      if (witnessInput) witnessInput.value = saved;
+      applyWitness(saved);
+
+      // Live update + persist
+      if (witnessInput) {
+        witnessInput.addEventListener('input', (e) => {
+          const v = e.target.value;
+          localStorage.setItem('kitty_witness', v);
+          applyWitness(v);
+        });
+      }
+
+      // Buttons (placeholders)
+      saveBtn.addEventListener('click', () => {
+        alert("Entry saved.\nNothing was sent.");
+      });
+
+      checkinBtn.addEventListener('click', () => {
+        alert("Check-in sent.\nNo content included.");
+      });
+
+      sosBtn.addEventListener('click', () => {
+        const ok = confirm("Send emergency signal?\nThis will display SOS and attempt to notify Earth.");
+        if(ok) overlay.style.display = 'flex';
+      });
+
+      exitSosBtn.addEventListener('click', () => {
+        overlay.style.display = 'none';
+      });
     });
-
-    checkinBtn.addEventListener('click', () => {
-      alert("Check-in sent.\\nNo content included.");
-    });
-
-    sosBtn.addEventListener('click', () => {
-      const ok = confirm("Send emergency signal?\\nThis will display SOS and attempt to notify Earth.");
-      if(ok) overlay.style.display = 'flex';
-    });
-
-    exitSosBtn.addEventListener('click', () => {
-      overlay.style.display = 'none';
-    });
-
-<script>
-  const witnessInput = document.getElementById('witnessInput');
-  const witnessName = document.getElementById('witnessName');
-
-  // Load saved witness
-  const savedWitness = localStorage.getItem('kitty_witness');
-  if (savedWitness !== null) {
-    witnessInput.value = savedWitness;
-    witnessName.textContent = savedWitness || '';
-  }
-
-  // Update witness live
-  witnessInput.addEventListener('input', () => {
-    const value = witnessInput.value.trim();
-    witnessName.textContent = value;
-    localStorage.setItem('kitty_witness', value);
-  });
-</script>
-  
-    
   </script>
 </body>
 </html>
