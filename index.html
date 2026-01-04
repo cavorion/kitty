@@ -273,6 +273,27 @@
     exitSosBtn.addEventListener('click', () => {
       overlay.style.display = 'none';
     });
+
+<script>
+  const witnessInput = document.getElementById('witnessInput');
+  const witnessName = document.getElementById('witnessName');
+
+  // Load saved witness
+  const savedWitness = localStorage.getItem('kitty_witness');
+  if (savedWitness !== null) {
+    witnessInput.value = savedWitness;
+    witnessName.textContent = savedWitness || '';
+  }
+
+  // Update witness live
+  witnessInput.addEventListener('input', () => {
+    const value = witnessInput.value.trim();
+    witnessName.textContent = value;
+    localStorage.setItem('kitty_witness', value);
+  });
+</script>
+  
+    
   </script>
 </body>
 </html>
