@@ -136,8 +136,13 @@
       border-color: rgba(52,201,255,0.35);
       background: rgba(52,201,255,0.08);
     }
-
     .btn.primary:hover{ background: rgba(52,201,255,0.12); }
+
+    .btn.earth{
+      border-color: rgba(106,169,255,0.35);
+      background: rgba(106,169,255,0.08);
+    }
+    .btn.earth:hover{ background: rgba(106,169,255,0.12); }
 
     .btn.sos{
       border-color: rgba(255,59,48,0.45);
@@ -172,6 +177,42 @@
       opacity: 0.9;
       object-fit: contain;
     }
+
+    .fieldRow{
+      display:flex;
+      gap:10px;
+      align-items:flex-end;
+      flex-wrap:wrap;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .field label{
+      font-size:12px;
+      color:var(--muted);
+      display:block;
+    }
+    .field input{
+      background: rgba(7,10,15,0.6);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 14px;
+      width: 220px;
+      outline:none;
+    }
+
+    .brandFaint{
+      margin-top:10px;
+      text-align:right;
+      font-size:11px;
+      letter-spacing:0.22em;
+      color: rgba(170,182,204,0.35);
+      user-select:none;
+    }
   </style>
 </head>
 
@@ -184,24 +225,21 @@
       </div>
 
       <div style="display:flex; align-items:flex-start; gap:12px; margin-top:10px;">
-        <div>
-          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">
-            Witness
-          </label>
-          <input
-            id="witnessInput"
-            type="text"
-            placeholder="Name or symbol (optional)"
-            style="
-              background: rgba(7,10,15,0.6);
-              border: 1px solid var(--line);
-              border-radius: 10px;
-              padding: 8px 10px;
-              color: var(--text);
-              font-size: 14px;
-              width: 220px;
-            "
-          />
+        <div class="fieldRow">
+          <div class="field">
+            <label for="witnessInput">Witness</label>
+            <input id="witnessInput" type="text" placeholder="Name or symbol (optional)" />
+          </div>
+
+          <div class="field">
+            <label for="fromName">From</label>
+            <input id="fromName" type="text" placeholder="Your name (optional)" />
+          </div>
+
+          <div class="field">
+            <label for="earthEmail">To Earth</label>
+            <input id="earthEmail" type="email" placeholder="earth@email.com" />
+          </div>
         </div>
 
         <img class="logo" src="./favicon.png" alt="Cavorion">
@@ -226,12 +264,19 @@
           <small>Send timestamp only</small>
         </button>
 
+        <button class="btn earth" id="sendEarthBtn">
+          SEND TO EARTH
+          <small>Email witness + timestamp</small>
+        </button>
+
         <button class="btn sos" id="sosBtn">
           SOS
           <small>Emergency signal</small>
         </button>
       </div>
     </div>
+
+    <div class="brandFaint">CAVOID</div>
   </div>
 
   <div class="sosOverlay" id="sosOverlay">
@@ -253,23 +298,34 @@
       const overlay = document.getElementById('sosOverlay');
       const exitSosBtn = document.getElementById('exitSosBtn');
 
-      // Witness controls
+      // Witness + Earth controls
       const witnessInput = document.getElementById('witnessInput');
       const witnessName = document.getElementById('witnessName');
       const comma = document.getElementById('comma');
 
+      const fromName = document.getElementById('fromName');
+      const earthEmail = document.getElementById('earthEmail');
+      const sendEarthBtn = document.getElementById('sendEarthBtn');
+
       const applyWitness = (raw) => {
         const v = (raw || "").trim();
-        // If blank, revert to Kitty (keeps the concept of "named witness" by default)
         witnessName.textContent = v || "Kitty";
-        // Optional: hide comma when blank. If you want always comma, delete next line.
-        if (comma) comma.style.display = (v || "Kitty") ? "inline" : "none";
+        document.title = `Dear ${v || "Kitty"}`;
+
+        // Keep comma always visible (delete this block if you prefer conditional)
+        if (comma) comma.style.display = "inline";
       };
 
-      // Load saved witness
-      const saved = localStorage.getItem('kitty_witness') || "";
-      if (witnessInput) witnessInput.value = saved;
-      applyWitness(saved);
+      // Load saved values
+      const savedWitness = localStorage.getItem('kitty_witness') || "";
+      const savedFrom = localStorage.getItem('kitty_from') || "";
+      const savedEarth = localStorage.getItem('kitty_earth_email') || "";
+
+      if (witnessInput) witnessInput.value = savedWitness;
+      if (fromName) fromName.value = savedFrom;
+      if (earthEmail) earthEmail.value = savedEarth;
+
+      applyWitness(savedWitness);
 
       // Live update + persist
       if (witnessInput) {
@@ -277,6 +333,18 @@
           const v = e.target.value;
           localStorage.setItem('kitty_witness', v);
           applyWitness(v);
+        });
+      }
+
+      if (fromName) {
+        fromName.addEventListener('input', (e) => {
+          localStorage.setItem('kitty_from', e.target.value);
+        });
+      }
+
+      if (earthEmail) {
+        earthEmail.addEventListener('input', (e) => {
+          localStorage.setItem('kitty_earth_email', e.target.value);
         });
       }
 
@@ -288,6 +356,34 @@
       checkinBtn.addEventListener('click', () => {
         alert("Check-in sent.\nNo content included.");
       });
+
+      // Send to Earth (safe demo: mailto only, no journal content by default)
+      if (sendEarthBtn) {
+        sendEarthBtn.addEventListener('click', () => {
+          const w = (witnessInput?.value || "Kitty").trim() || "Kitty";
+          const f = (fromName?.value || "").trim();
+          const to = (earthEmail?.value || "").trim();
+
+          if (!to) {
+            alert("Add a 'To Earth' email first (top right).");
+            return;
+          }
+
+          const timestamp = new Date().toISOString();
+          const subject = encodeURIComponent(`CAVOID Check-in — ${w}`);
+
+          const lines = [
+            `Witness: ${w}`,
+            f ? `From: ${f}` : null,
+            `Timestamp: ${timestamp}`,
+            ``,
+            `Note: No journal content was included by design.`
+          ].filter(Boolean);
+
+          const body = encodeURIComponent(lines.join("\n"));
+          window.location.href = `mailto:${encodeURIComponent(to)}?subject=${subject}&body=${body}`;
+        });
+      }
 
       sosBtn.addEventListener('click', () => {
         const ok = confirm("Send emergency signal?\nThis will display SOS and attempt to notify Earth.");
