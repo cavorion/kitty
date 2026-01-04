@@ -178,25 +178,28 @@
     }
     .sosOverlay p{ color:#fff; opacity:0.8; margin:0; font-size:16px; }
 
-    .logo {
-  width: 26px;
-  height: 26px;
-  opacity: 0.85;
-}
   
+  .logo { 
+  width: 34px; 
+  height: 34px; 
+  opacity: 0.9; 
+  object-fit: contain;
+}
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="header">
-      <div>
-        <h1 class="title">DEAR KITTY</h1>
-        <div class="subtitle">A private space. Nothing is analysed. Nothing is sent unless you choose.</div>
-      </div>
-      <div class="logo"> <img src="./public/favicon.png" alt="Cavorion">   </div>
+  <div class="header">
+  <div>
+    <h1 class="title">DEAR KITTY</h1>
+    <div class="subtitle">A private space. Nothing is analysed. Nothing is sent unless you choose.</div>
+  </div>
 
-    <div class="dear">Dear <span>Kitty</span>,</div>
+  <img class="logo" src="./public/favicon.png" alt="Cavorion">
+</div>
 
+<div class="dear">Dear <span>Kitty</span>,</div>
+    
     <textarea id="entry" placeholder="Write here…"></textarea>
 
     <div class="footer">
