@@ -194,11 +194,29 @@
     <h1 class="title">DEAR KITTY</h1>
     <div class="subtitle">A private space. Nothing is analysed. Nothing is sent unless you choose.</div>
   </div>
-
-  <img class="logo" src="./favicon.png" alt="Cavorion">
+<div style="margin-top:10px;">
+  <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">
+    Witness
+  </label>
+  <input
+    id="witnessInput"
+    type="text"
+    placeholder="Name or symbol (optional)"
+    style="
+      background: rgba(7,10,15,0.6);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 14px;
+      width: 220px;
+    "
+  />
+</div>
+    <img class="logo" src="./favicon.png" alt="Cavorion">
 </div>
 
-<div class="dear">Dear <span>Kitty</span>,</div>
+<div class="dear">Dear <span id="witnessName">Kitty</span>,</div>
     
     <textarea id="entry" placeholder="Write here…"></textarea>
 
