@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -40,6 +41,8 @@
       border-radius:18px;
       padding:22px;
       box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      position:relative;
+      z-index:1;
     }
 
     .header{
@@ -123,14 +126,18 @@
 
     .btn.primary{ background: rgba(52,201,255,0.08); }
     .btn.earth{ background: rgba(106,169,255,0.08); }
-    .btn.sos{ background: rgba(255,59,48,0.10); }
+    .btn.sos{
+      background: rgba(255,59,48,0.10);
+      border-color: rgba(255,59,48,0.45);
+      color:#FFECEC;
+    }
 
     .fieldRow{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
     }
-    .field input{
+    .fieldRow input{
       width:220px;
       padding:8px 10px;
       background: rgba(7,10,15,0.6);
@@ -146,10 +153,38 @@
       color: rgba(170,182,204,0.35);
       margin-top:10px;
     }
+
+    /* ===== SOS OVERLAY ===== */
+    .sosOverlay{
+      position:fixed;
+      inset:0;
+      background:#000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:18px;
+      z-index:9999;
+    }
+
+    .sosOverlay h1{
+      font-size:86px;
+      letter-spacing:0.1em;
+      margin:0;
+      color:var(--sos);
+    }
+
+    .sosOverlay p{
+      color:#fff;
+      opacity:0.8;
+      margin:0;
+      font-size:16px;
+    }
   </style>
 </head>
 
 <body>
+
 <div class="card">
 
   <div class="header">
@@ -177,16 +212,17 @@
     </div>
   </div>
 
-  <div class="sosOverlay" id="sosOverlay">
+  <div class="brandFaint">CAVOID</div>
+</div>
+
+<!-- SOS OVERLAY -->
+<div class="sosOverlay" id="sosOverlay">
   <h1>SOS</h1>
   <p>Emergency signal active.</p>
   <button class="btn" id="exitSosBtn" style="min-width:220px;">
     EXIT SOS
     <small>Return to journal</small>
   </button>
-</div>
-  
-  <div class="brandFaint">CAVOID</div>
 </div>
 
 <script>
@@ -201,6 +237,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = document.getElementById('saveBtn');
   const checkinBtn = document.getElementById('checkinBtn');
   const sendEarthBtn = document.getElementById('sendEarthBtn');
+
+  const sosBtn = document.getElementById('sosBtn');
+  const sosOverlay = document.getElementById('sosOverlay');
+  const exitSosBtn = document.getElementById('exitSosBtn');
 
   witnessInput.addEventListener('input', e => {
     witnessName.textContent = e.target.value || "Kitty";
@@ -238,7 +278,20 @@ document.addEventListener('DOMContentLoaded', () => {
       `mailto:${earthEmail.value}?subject=Dear Kitty — message&body=${body}`;
   };
 
+  /* ===== SOS LOGIC (RESTORED) ===== */
+  sosBtn.onclick = () => {
+    const ok = confirm(
+      "Activate SOS?\nThis will display an emergency signal on screen."
+    );
+    if (ok) sosOverlay.style.display = 'flex';
+  };
+
+  exitSosBtn.onclick = () => {
+    sosOverlay.style.display = 'none';
+  };
+
 });
 </script>
+
 </body>
 </html>
