@@ -1,0 +1,405 @@
+<!-- archive.html (drop into the same folder as index.html) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dear Kitty — Archive</title>
+
+  <style>
+    :root{
+      --bg:#070A0F;
+      --panel:#0D1320;
+      --text:#E9EEF7;
+      --muted:#AAB6CC;
+      --line:#1D2740;
+      --accent:#34C9FF;
+      --danger:#FF3B30;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at 35% 20%, rgba(52,201,255,0.10), transparent 40%),
+        radial-gradient(circle at 75% 70%, rgba(106,169,255,0.08), transparent 45%),
+        var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      min-height:100vh;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:18px;
+    }
+
+    .card{
+      width:min(980px, 100%);
+      background: linear-gradient(180deg, rgba(13,19,32,0.92), rgba(13,19,32,0.85));
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:22px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+    }
+
+    .header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--line);
+      margin-bottom:14px;
+    }
+
+    .title{
+      font-size:28px;
+      letter-spacing:0.04em;
+      font-weight:800;
+      margin:0;
+    }
+    .subtitle{
+      margin-top:6px;
+      font-size:13px;
+      color:var(--muted);
+      max-width:60ch;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:flex-end;
+      align-items:center;
+    }
+
+    .btn{
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color:var(--text);
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn small{
+      display:block;
+      font-size:11px;
+      font-weight:600;
+      margin-top:3px;
+      color:var(--muted);
+    }
+    .btn.primary{
+      border-color: rgba(52,201,255,0.35);
+      background: rgba(52,201,255,0.08);
+    }
+    .btn.danger{
+      border-color: rgba(255,59,48,0.45);
+      background: rgba(255,59,48,0.10);
+      color:#FFECEC;
+    }
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin: 10px 0 6px;
+    }
+
+    .count{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .entry{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      background: rgba(7,10,15,0.38);
+    }
+
+    .meta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+
+    .metaLeft{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .pill{
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+
+    pre{
+      margin:0;
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-size:15px;
+      line-height:1.5;
+      color:var(--text);
+    }
+
+    .entryActions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .link{
+      color: var(--muted);
+      text-decoration:none;
+      font-size:13px;
+      border-bottom: 1px dotted rgba(170,182,204,0.35);
+      padding-bottom:2px;
+    }
+    .link:hover{ color: var(--text); }
+
+    .empty{
+      border:1px dashed rgba(170,182,204,0.25);
+      border-radius:16px;
+      padding:18px;
+      color:var(--muted);
+      font-size:14px;
+      background: rgba(7,10,15,0.22);
+    }
+
+    .brandFaint{
+      margin-top:12px;
+      text-align:right;
+      font-size:11px;
+      letter-spacing:0.22em;
+      color: rgba(170,182,204,0.28);
+      user-select:none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="header">
+      <div>
+        <h1 class="title">DEAR KITTY — ARCHIVE</h1>
+        <div class="subtitle">
+          Entries are stored locally in your browser (this device). Nothing is uploaded.
+          Export periodically to keep a durable backup.
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="link" href="index.html">← Back to Journal</a>
+
+        <button class="btn primary" id="exportTxtBtn">
+          EXPORT TXT
+          <small>Readable log</small>
+        </button>
+
+        <button class="btn primary" id="exportJsonBtn">
+          EXPORT JSON
+          <small>Structured backup</small>
+        </button>
+
+        <button class="btn danger" id="clearAllBtn">
+          CLEAR ALL
+          <small>Deletes local archive</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="count" id="countLabel">0 entries</div>
+    </div>
+
+    <div class="list" id="list"></div>
+
+    <div class="brandFaint">CAVOID</div>
+  </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ENTRIES_KEY = "kitty_entries_v1";
+
+  const listEl = document.getElementById("list");
+  const countLabel = document.getElementById("countLabel");
+
+  const exportTxtBtn = document.getElementById("exportTxtBtn");
+  const exportJsonBtn = document.getElementById("exportJsonBtn");
+  const clearAllBtn = document.getElementById("clearAllBtn");
+
+  function nowISO() {
+    return new Date().toISOString();
+  }
+
+  function loadEntries() {
+    try {
+      return JSON.parse(localStorage.getItem(ENTRIES_KEY) || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function saveEntries(entries) {
+    localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function downloadFile(filename, content, mime = "text/plain;charset=utf-8") {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportTxt() {
+    const entries = loadEntries();
+    if (!entries.length) {
+      alert("No saved entries yet.");
+      return;
+    }
+
+    const lines = [];
+    lines.push("DEAR KITTY — LOCAL ARCHIVE");
+    lines.push(`Exported: ${nowISO()}`);
+    lines.push("");
+
+    for (const e of entries) {
+      lines.push("------------------------------------------------------------");
+      lines.push(`Date: ${e.createdAt || ""}`);
+      lines.push(`Witness: ${e.witness || "Kitty"}`);
+      lines.push(`From: ${e.from || ""}`);
+      if (e.toEarth) lines.push(`To Earth: ${e.toEarth}`);
+      lines.push("");
+      lines.push(e.message || "");
+      lines.push("");
+    }
+
+    downloadFile(
+      `dear-kitty-entries-${new Date().toISOString().slice(0,10)}.txt`,
+      lines.join("\n")
+    );
+  }
+
+  function exportJson() {
+    const entries = loadEntries();
+    if (!entries.length) {
+      alert("No saved entries yet.");
+      return;
+    }
+
+    downloadFile(
+      `dear-kitty-entries-${new Date().toISOString().slice(0,10)}.json`,
+      JSON.stringify({ exportedAt: nowISO(), entries }, null, 2),
+      "application/json;charset=utf-8"
+    );
+  }
+
+  function render() {
+    const entries = loadEntries().slice().reverse(); // newest first
+    countLabel.textContent = `${entries.length} ${entries.length === 1 ? "entry" : "entries"}`;
+
+    listEl.innerHTML = "";
+
+    if (!entries.length) {
+      listEl.innerHTML = `
+        <div class="empty">
+          No entries saved yet.<br/>
+          Go back to the journal and click <b>SAVE ENTRY</b> to add to your local archive.
+        </div>
+      `;
+      return;
+    }
+
+    for (const e of entries) {
+      const id = e.id || "";
+      const createdAt = e.createdAt || "";
+      const witness = e.witness || "Kitty";
+      const from = e.from || "";
+      const toEarth = e.toEarth || "";
+      const msg = e.message || "";
+
+      const item = document.createElement("div");
+      item.className = "entry";
+      item.innerHTML = `
+        <div class="meta">
+          <div class="metaLeft">
+            <span class="pill">Date: ${escapeHtml(createdAt)}</span>
+            <span class="pill">Witness: ${escapeHtml(witness)}</span>
+            ${from ? `<span class="pill">From: ${escapeHtml(from)}</span>` : ``}
+            ${toEarth ? `<span class="pill">To: ${escapeHtml(toEarth)}</span>` : ``}
+          </div>
+          <div class="entryActions">
+            <button class="btn danger" data-delete="${escapeHtml(id)}">DELETE</button>
+          </div>
+        </div>
+        <pre>${escapeHtml(msg)}</pre>
+      `;
+      listEl.appendChild(item);
+    }
+
+    // Wire delete buttons
+    listEl.querySelectorAll("[data-delete]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-delete");
+        const ok = confirm("Delete this entry from the local archive?");
+        if (!ok) return;
+
+        const all = loadEntries();
+        const next = all.filter(e => String(e.id) !== String(id));
+        saveEntries(next);
+        render();
+      });
+    });
+  }
+
+  exportTxtBtn.addEventListener("click", exportTxt);
+  exportJsonBtn.addEventListener("click", exportJson);
+
+  clearAllBtn.addEventListener("click", () => {
+    const ok = confirm("Clear ALL entries from this device?\nThis cannot be undone.");
+    if (!ok) return;
+    localStorage.removeItem(ENTRIES_KEY);
+    render();
+  });
+
+  render();
+});
+</script>
+</body>
+</html>
