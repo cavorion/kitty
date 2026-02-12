@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -205,10 +204,31 @@
 
   <div class="footer">
     <div class="btns">
-      <button class="btn primary" id="saveBtn">SAVE</button>
-      <button class="btn" id="checkinBtn">CHECK-IN</button>
-      <button class="btn earth" id="sendEarthBtn">SEND TO EARTH</button>
-      <button class="btn sos" id="sosBtn">SOS</button>
+      <button class="btn primary" id="saveBtn">
+        SAVE ENTRY
+        <small>Add to local archive</small>
+      </button>
+      <button class="btn" id="exportTxtBtn">
+        EXPORT TXT
+        <small>Download entries</small>
+      </button>
+      <button class="btn" id="exportJsonBtn">
+        EXPORT JSON
+        <small>Download backup</small>
+      </button>
+
+      <button class="btn" id="checkinBtn">
+        CHECK-IN
+        <small>Send timestamp only</small>
+      </button>
+      <button class="btn earth" id="sendEarthBtn">
+        SEND TO EARTH
+        <small>Email journal + timestamp</small>
+      </button>
+      <button class="btn sos" id="sosBtn">
+        SOS
+        <small>Emergency signal</small>
+      </button>
     </div>
   </div>
 
@@ -235,6 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const witnessName = document.getElementById('witnessName');
 
   const saveBtn = document.getElementById('saveBtn');
+  const exportTxtBtn = document.getElementById('exportTxtBtn');
+  const exportJsonBtn = document.getElementById('exportJsonBtn');
+
   const checkinBtn = document.getElementById('checkinBtn');
   const sendEarthBtn = document.getElementById('sendEarthBtn');
 
@@ -242,20 +265,166 @@ document.addEventListener('DOMContentLoaded', () => {
   const sosOverlay = document.getElementById('sosOverlay');
   const exitSosBtn = document.getElementById('exitSosBtn');
 
+  // ===== Witness display =====
   witnessInput.addEventListener('input', e => {
     witnessName.textContent = e.target.value || "Kitty";
   });
 
-  saveBtn.onclick = () => {
-    alert("Saved locally. Nothing sent.");
-  };
+  // ===== Local Draft Autosave + Archive + Export =====
+  const DRAFT_KEY = "kitty_draft_v1";
+  const ENTRIES_KEY = "kitty_entries_v1";
 
+  function nowISO() {
+    return new Date().toISOString();
+  }
+
+  function getMeta() {
+    return {
+      witness: (witnessInput.value || "Kitty").trim() || "Kitty",
+      from: (fromName.value || "Chi").trim() || "Chi",
+      toEarth: (earthEmail.value || "").trim()
+    };
+  }
+
+  function loadDraft() {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+
+      if (d?.entry != null) entry.value = d.entry;
+      if (d?.witness != null) witnessInput.value = d.witness;
+      if (d?.from != null) fromName.value = d.from;
+      if (d?.toEarth != null) earthEmail.value = d.toEarth;
+
+      witnessName.textContent = witnessInput.value || "Kitty";
+    } catch (e) {
+      // ignore draft load errors
+    }
+  }
+
+  function saveDraft() {
+    const m = getMeta();
+    const payload = {
+      savedAt: nowISO(),
+      witness: m.witness,
+      from: m.from,
+      toEarth: m.toEarth,
+      entry: entry.value
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+  }
+
+  // Autosave as you type
+  entry.addEventListener("input", saveDraft);
+  witnessInput.addEventListener("input", saveDraft);
+  fromName.addEventListener("input", saveDraft);
+  earthEmail.addEventListener("input", saveDraft);
+
+  // Load draft on startup
+  loadDraft();
+
+  function loadEntries() {
+    try {
+      return JSON.parse(localStorage.getItem(ENTRIES_KEY) || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function saveEntries(entries) {
+    localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+  }
+
+  function addEntryToArchive() {
+    const m = getMeta();
+    const message = (entry.value || "").trim();
+
+    if (!message) {
+      alert("Nothing to save yet — write an entry first.");
+      return;
+    }
+
+    const entries = loadEntries();
+    entries.push({
+      id: (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+      createdAt: nowISO(),
+      witness: m.witness,
+      from: m.from,
+      toEarth: m.toEarth,
+      message
+    });
+    saveEntries(entries);
+
+    // Keep your draft as-is (so you can keep editing), but ensure latest draft saved
+    saveDraft();
+
+    alert("Saved to this device (local archive).");
+  }
+
+  function downloadFile(filename, content, mime = "text/plain;charset=utf-8") {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportTxt() {
+    const entries = loadEntries();
+    if (!entries.length) {
+      alert("No saved entries yet.");
+      return;
+    }
+
+    const lines = [];
+    lines.push("DEAR KITTY — LOCAL ARCHIVE");
+    lines.push(`Exported: ${nowISO()}`);
+    lines.push("");
+
+    for (const e of entries) {
+      lines.push("------------------------------------------------------------");
+      lines.push(`Date: ${e.createdAt}`);
+      lines.push(`Witness: ${e.witness}`);
+      lines.push(`From: ${e.from}`);
+      if (e.toEarth) lines.push(`To Earth: ${e.toEarth}`);
+      lines.push("");
+      lines.push(e.message);
+      lines.push("");
+    }
+
+    downloadFile(`dear-kitty-entries-${new Date().toISOString().slice(0,10)}.txt`, lines.join("\n"));
+  }
+
+  function exportJson() {
+    const entries = loadEntries();
+    if (!entries.length) {
+      alert("No saved entries yet.");
+      return;
+    }
+
+    downloadFile(
+      `dear-kitty-entries-${new Date().toISOString().slice(0,10)}.json`,
+      JSON.stringify({ exportedAt: nowISO(), entries }, null, 2),
+      "application/json;charset=utf-8"
+    );
+  }
+
+  saveBtn.onclick = addEntryToArchive;
+  exportTxtBtn.onclick = exportTxt;
+  exportJsonBtn.onclick = exportJson;
+
+  // ===== Email functions (mailto) =====
   checkinBtn.onclick = () => {
     if(!earthEmail.value) return alert("Add a To Earth email.");
 
     const body = encodeURIComponent(
-      `Witness: ${witnessInput.value || "Kitty"}\n` +
-      `From: ${fromName.value || "Chi"}\n` +
+      `Witness: ${(witnessInput.value || "Kitty")}\n` +
+      `From: ${(fromName.value || "Chi")}\n` +
       `Timestamp: ${new Date().toISOString()}\n\n` +
       `Check-in only.`
     );
@@ -268,10 +437,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!earthEmail.value) return alert("Add a To Earth email.");
 
     const body = encodeURIComponent(
-      `Witness: ${witnessInput.value || "Kitty"}\n` +
-      `From: ${fromName.value || "Chi"}\n` +
+      `Witness: ${(witnessInput.value || "Kitty")}\n` +
+      `From: ${(fromName.value || "Chi")}\n` +
       `Timestamp: ${new Date().toISOString()}\n\n` +
-      entry.value
+      (entry.value || "")
     );
 
     window.location.href =
